@@ -55,6 +55,58 @@ public class MessageService {
         }
     }
 
+    public static String update(Message itemToSave) {
+        try {
+            PreparedStatement statement = DatabaseConnection.newStatement(
+                    "UPDATE Messages SET Text = ?, PostDate = ?, Author = ? WHERE Id = ?"
+            );
+            statement.setString(1, itemToSave.getText());
+            statement.setString(2, itemToSave.getPostDate());
+            statement.setString(3, itemToSave.getAuthor());
+            statement.setInt(4, itemToSave.getId());
+            statement.executeUpdate();
+            return "OK";
+        } catch (SQLException resultsException) {
+            String error = "Database error - can't update 'Messages' table: " + resultsException.getMessage();
+            Console.log(error);
+            return error;
+        }
+    }
 
+    public static Message selectById(int id) {
+        Message result = null;
+        try {
+            PreparedStatement statement = DatabaseConnection.newStatement(
+                    "SELECT Id, Text, PostDate, Author FROM Messages WHERE Id = ?"
+            );
+            if (statement != null) {
+                statement.setInt(1, id);
+                ResultSet results = statement.executeQuery();
+                if (results != null && results.next()) {
+                    result = new Message(results.getInt("Id"), results.getString("Text"),
+                            results.getString("PostDate"), results.getString("Author"));
+                }
+            }
+        } catch (SQLException resultsException) {
+            String error = "Database error - can't select by id from 'Messages' table: " + resultsException.getMessage();
+            Console.log(error);
+        }
+        return result;
+    }
+
+    public static String deleteById(int id) {
+        try {
+            PreparedStatement statement = DatabaseConnection.newStatement(
+                    "DELETE FROM Messages WHERE Id = ?"
+            );
+            statement.setInt(1, id);
+            statement.executeUpdate();
+            return "OK";
+        } catch (SQLException resultsException) {
+            String error = "Database error - can't delete by id from 'Messages' table: " + resultsException.getMessage();
+            Console.log(error);
+            return error;
+        }
+    }
 
 }
