@@ -5,8 +5,10 @@ import org.json.simple.JSONObject;
 import server.Console;
 import server.models.Message;
 import server.models.services.MessageService;
+import server.models.services.UserService;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import java.util.Date;
 
@@ -25,7 +27,12 @@ public class MessageController {
     @GET
     @Path("list")
     @Produces(MediaType.APPLICATION_JSON)
-    public String listMessages() {
+    public String listMessages(@CookieParam("sessionToken") Cookie sessionCookie) {
+
+        if (UserService.validateSessionCookie(sessionCookie) == null) {
+            return "Error: Invalid user session token";
+        }
+
         Console.log("/message/list - Getting all messages from database");
         String status = MessageService.selectAllInto(Message.messages);
         if (status.equals("OK")) {
@@ -43,16 +50,19 @@ public class MessageController {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
     public String newMessage(@FormParam("messageText") String messageText,
-                             @FormParam("messageAuthor") String messageAuthor ) {
+                             @CookieParam("sessionToken") Cookie sessionCookie) {
 
-        Console.log("/message/new - Posted by " + messageAuthor);
+        String currentUsername = UserService.validateSessionCookie(sessionCookie);
+        if (currentUsername == null) return "Error: Invalid user session token";
+
+        Console.log("/message/new - Posted by " + currentUsername);
 
         MessageService.selectAllInto(Message.messages);
 
         int messageId = Message.nextId();
         String messageDate = new Date().toString();
 
-        Message newMessage = new Message(messageId, messageText, messageDate, messageAuthor);
+        Message newMessage = new Message(messageId, messageText, messageDate, currentUsername);
         return MessageService.insert(newMessage);
     }
 
@@ -60,12 +70,20 @@ public class MessageController {
     @Path("delete")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    public String deleteMessage(@FormParam("messageId") int messageId) {
+    public String deleteMessage(@FormParam("messageId") int messageId,
+                                @CookieParam("sessionToken") Cookie sessionCookie) {
+
+        String currentUsername = UserService.validateSessionCookie(sessionCookie);
+        if (currentUsername == null) return "Error: Invalid user session token";
+
         Console.log("/message/delete - Message " + messageId);
         Message message = MessageService.selectById(messageId);
         if (message == null) {
             return "That message doesn't appear to exist";
         } else {
+            if (!message.getAuthor().equals(currentUsername)) {
+                return "That message doesn't belong to you!";
+            }
             return MessageService.deleteById(messageId);
         }
     }
@@ -74,13 +92,21 @@ public class MessageController {
     @Path("edit")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    public String editMessage(@FormParam("messageId") int messageId, @FormParam("messageText") String messageText) {
+    public String editMessage(@FormParam("messageId") int messageId,
+                              @FormParam("messageText") String messageText,
+                              @CookieParam("sessionToken") Cookie sessionCookie) {
+
+        String currentUsername = UserService.validateSessionCookie(sessionCookie);
+        if (currentUsername == null) return "Error: Invalid user session token";
         Console.log("/message/edit - Message " + messageId);
         Message message = MessageService.selectById(messageId);
         String messageDate = new Date().toString();
         if (message == null) {
             return "That message doesn't appear to exist";
         } else {
+            if (!message.getAuthor().equals(currentUsername)) {
+                return "That message doesn't belong to you!";
+            }
             message.setText(messageText);
             message.setPostDate(messageDate);
             return MessageService.update(message);

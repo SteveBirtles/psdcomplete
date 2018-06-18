@@ -1,0 +1,78 @@
+<!doctype html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+
+    <head>
+
+        <title>Practical Skills Development Barebones Server</title>
+
+        <link rel="shortcut icon" href="/client/favicon.ico" type="image/x-icon">
+
+        <script src="/client/js/jquery-3.3.1.min.js"></script>
+        <script src="/client/js/popper.min.js"></script>
+        <script src="/client/js/bootstrap.min.js"></script>
+        <script src="/client/js/js.cookie.min.js"></script>
+
+        <link href="/client/css/bootstrap.min.css" rel="stylesheet">
+
+
+        <script src="/client/js/login.js"></script>
+
+    </head>
+
+    <body class="bg-dark" onload="pageLoad()">
+
+        <div class="container bg-white">
+
+            <div class="jumbotron text-center">
+                <h1>Welcome to my message board!</h1>
+            </div>
+
+            <div class="row">
+
+                <div class="col text-center p-3">
+                    <form id="loginForm">
+                        <h1 class="h3 mb-3 font-weight-normal text-primary">Existing user</h1>
+                        <div class="form-group">
+                            <label>Username
+                                <input name="username" class="form-control" required autofocus>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Password
+                                <input type="password" name="password" class="form-control" required>
+                            </label>
+                        </div>
+                        <button class="btn btn-lg btn-primary">Log in</button>
+                    </form>
+                </div>
+
+                <div class="col text-center p-3">
+                    <form id="newUserForm">
+                        <h1 class="h3 mb-3 font-weight-normal text-success">New user</h1>
+                        <div class="form-group">
+                            <label>Username
+                                <input name="username" class="form-control" required autofocus>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Password
+                                <input type="password" name="password1" class="form-control" required>
+                            </label>
+                            <label>Confirm password
+                                <input type="password" name="password2" class="form-control" required>
+                            </label>
+                        </div>
+                        <button class="btn btn-lg btn-success">Create user account</button>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+
+    </body>
+
+</html>
+
+
