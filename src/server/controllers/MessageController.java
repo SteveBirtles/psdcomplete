@@ -1,7 +1,10 @@
 package server.controllers;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import server.Console;
 import server.models.Message;
+import server.models.services.MessageService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -23,23 +26,33 @@ public class MessageController {
     @Path("list")
     @Produces(MediaType.APPLICATION_JSON)
     public String listMessages() {
-        return getMessageList();
+        Console.log("/message/list - Getting all messages from database");
+        String status = MessageService.selectAllInto(Message.messages);
+        if (status.equals("OK")) {
+            return getMessageList();
+        } else {
+            JSONObject response = new JSONObject();
+            response.put("error", status);
+            return response.toString();
+        }
+
     }
 
     @POST
     @Path("new")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     public String newMessage(@FormParam("messageText") String messageText,
                              @FormParam("messageAuthor") String messageAuthor ) {
+
+        Console.log("/message/new - Posted by " + messageAuthor);
+
+        MessageService.selectAllInto(Message.messages);
 
         int messageId = Message.nextId();
         String messageDate = new Date().toString();
 
-        Message.messages.add(new Message(messageId, messageText, messageDate, messageAuthor));
-
-        return getMessageList();
-
-
+        Message newMessage = new Message(messageId, messageText, messageDate, messageAuthor);
+        return MessageService.insert(newMessage);
     }
 }

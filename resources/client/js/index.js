@@ -16,23 +16,34 @@ function loadMessages() {
         url: '/message/list',
         type: 'GET',
         success: messageList => {
-            for (let message of messageList) {
-                messagesHTML += renderMessage(message);
+            if (messageList.hasOwnProperty('error')) {
+                alert(messageList.error);
+            } else {
+                for (let message of messageList) {
+                    messagesHTML += renderMessage(message);
+                }
+                $('#messages').html(messagesHTML);
             }
-            $('#messages').html(messagesHTML);
         }
     });
 }
 
 function resetForm() {
     const form = $('#messageForm');
+    form.unbind("submit");
     form.submit(event => {
         event.preventDefault();
         $.ajax({
             url: '/message/new',
             type: 'POST',
             data: form.serialize(),
-            success: loadMessages
+            success: response => {
+                if (response === 'OK') {
+                    pageLoad();
+                } else {
+                    alert(response);
+                }
+            }
         });
     });
 }
