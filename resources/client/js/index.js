@@ -28,6 +28,7 @@ function renderMessage(message) {
 
 function loadMessages() {
     let messagesHTML = '';
+    $("input[name='messageText']").val("");
     $.ajax({
         url: '/message/list',
         type: 'GET',
